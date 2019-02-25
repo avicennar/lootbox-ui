@@ -1,28 +1,57 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import {Route} from 'react-router-dom';
+import {connect} from 'react-redux';
+import Cookies from "universal-cookie";
+import {keepLogin,cookieChecked} from './action';
+import {withRouter} from 'react-router-dom';
+import Login from './component/interface/Login';
+import Header from './component/interface/Header';
+import Register from './component/interface/Register';
+import Home from './component/interface/Home';
+import DetailProduk from './component/interface/DetailProduk';
+import PageKategori from './component/feature/PageKategori';
+import PageProduk from './component/feature/PageProduk';
+
+const cookies = new Cookies();
 
 class App extends Component {
+
+  componentDidMount(){
+    const userCookie = cookies.get('dataUser');
+    if(userCookie !== undefined){
+      this.props.keepLogin(userCookie);
+    }
+    else{
+      this.props.cookieChecked();
+    }
+  }
+
   render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
+    if(this.props.cookie){
+      return (
+        <div>
+          <Header navBrand={'LOOTBOX'} />
+            <div>
+              <Route exact path='/' component={Home} />
+              <Route exact path='/login' component={Login} />
+              <Route exact path='/register' component={Register} />
+              <Route exact path='/produk-detail' component={DetailProduk}/>
+              <Route exact path='/editproduk' component={PageProduk}/>
+              <Route exact path='/editkategori' component={PageKategori}/>
+            </div>
+        </div>
+      );
+    }
+    return (<div><center><h1>Loading...</h1></center></div>)
   }
 }
 
-export default App;
+const mapStateToProps =(state)=>{
+  return {
+      cookie: state.auth.cookie
+  };
+}
+
+export default withRouter(connect(mapStateToProps, {keepLogin,cookieChecked})(App));
+
